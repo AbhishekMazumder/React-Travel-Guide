@@ -1,10 +1,10 @@
 import React from 'react'
 
-const PlaceDetails = () => {
+const PlaceDetails = ({place}) => {
   return (
-    <div>
-      Place Details
-    </div>
+    <h3>
+      {place.name}
+    </h3>
   )
 }
 
