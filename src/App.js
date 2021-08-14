@@ -4,7 +4,7 @@ import { CssBaseline, Grid } from '@material-ui/core';
 import Header from './components/Header/Header.jsx';
 import List from './components/List/List.jsx';
 import Map from './components/Map/Map.jsx';
-import { getPlacesData } from './api/index';
+import { getPlacesData, getWeatherData } from './api/index';
 
 const App = () => {
 	const [places, setPlaces] = useState([]);
@@ -19,6 +19,8 @@ const App = () => {
 
 	const [childClicked, setChildClicked] = useState(null);
 	const [isLoading, setIsLoading] = useState(false);
+
+	const [weatherData, setWeatherData] = useState([]);
 
 	// Getting User's Geo-Location during app starts
 	useEffect(() => {
@@ -39,6 +41,9 @@ const App = () => {
 	useEffect(() => {
 		if (bounds.sw && bounds.ne) {
 			setIsLoading(true);
+
+			getWeatherData(coordinates.lat, coordinates.lng).then(data => setWeatherData(data));
+
 			getPlacesData(type, bounds.ne, bounds.sw).then(data => {
 				setPlaces(data?.filter(place => place.name && place.num_reviews > 0));
 				setFilteredPlaces([]);
@@ -79,6 +84,7 @@ const App = () => {
 						coordinates={coordinates}
 						places={filteredPlaces.length ? filteredPlaces : places}
 						setChildClicked={setChildClicked}
+						weatherData={weatherData}
 					/>
 				</Grid>
 			</Grid>
