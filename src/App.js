@@ -6,11 +6,13 @@ import List from './components/List/List.jsx';
 import Map from './components/Map/Map.jsx';
 import { getPlacesData } from './api/index';
 
-function App() {
+const App = () => {
 	const [places, setPlaces] = useState([]);
 	const [coordinates, setCoordinates] = useState({});
 	const [bounds, setBounds] = useState({});
 	const [filteredPlaces, setFilteredPlaces] = useState([]);
+
+	const [autocomplete, setAutocomplete] = useState('');
 
 	const [type, setType] = useState('restaurants');
 	const [rating, setRating] = useState('');
@@ -35,18 +37,29 @@ function App() {
 
 	// Getting/Fetching The Places
 	useEffect(() => {
-		setIsLoading(true);
-		getPlacesData(type, bounds.ne, bounds.sw).then(data => {
-			setPlaces(data);
-			setFilteredPlaces([]);
-			setIsLoading(false);
-		});
-	}, [coordinates, bounds, type]);
+		if (bounds.sw && bounds.ne) {
+			setIsLoading(true);
+			getPlacesData(type, bounds.ne, bounds.sw).then(data => {
+				setPlaces(data?.filter(place => place.name && place.num_reviews > 0));
+				setFilteredPlaces([]);
+				setIsLoading(false);
+			});
+		}
+	}, [bounds, type]);
+
+	const onLoad = autoC => setAutocomplete(autoC);
+
+	const onPlaceChanged = () => {
+		const lat = autocomplete.getPlace().geometry.location.lat();
+		const lng = autocomplete.getPlace().geometry.location.lng();
+
+		setCoordinates({ lat, lng });
+	};
 
 	return (
 		<>
 			<CssBaseline />
-			<Header />
+			<Header onPlaceChanged={onPlaceChanged} onLoad={onLoad} />
 			<Grid container spacing={3} style={{ width: '100%' }}>
 				<Grid item xs={12} md={4}>
 					<List
@@ -71,6 +84,6 @@ function App() {
 			</Grid>
 		</>
 	);
-}
+};
 
 export default App;
